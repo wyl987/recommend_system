@@ -1,0 +1,34 @@
+import streamlit as st
+
+st.markdown(
+    """
+    <style>
+    input[type="text"] {
+        background-color: #ffcccb; /* Light pink background */
+        color: black; /* Optional: Text color */
+    }
+    </style>
+    """, unsafe_allow_html=True
+)
+
+st.title('GHW Valentines Recommendation System')
+
+st.divider()
+
+st.image('https://img.freepik.com/free-vector/couple-romantic-penguins-celebrating-saint-valentine_1150-40223.jpg?t=st=1739248566~exp=1739252166~hmac=9fff7fd7e5827db99baa37c6e33ece1e446703c3b3ab5ee68995af4a6f8491cf&w=360', width=300)
+
+st.subheader('Fill the questions so you can get a match!')
+
+hobbies = st.text_input('What are your top three interests or hobbies?')
+new_hobbies = st.text_input('What’s one hobby or activity you’ve always wanted to try but haven’t yet?')
+cuisine = st.text_input('What’s your favorite type of cuisine?')
+music = st.text_input('What type of music do you enjoy the most?')
+partner_traits = st.text_input('What are you looking for in a partner?')
+personalities = st.text_input('How would your friends describe your personality?')
+
+if st.button("Submit"):
+  # recommendation function
+  st.success("Match found!")
+else:
+  st.warning("Please fill in the questions above.")
+
