@@ -1,6 +1,18 @@
 import streamlit as st
+import pymongo
+import openai
+
 
 mongo_URI = st.secrets["mongo_URI"]
+
+# 1. Create mongodb connection
+client = pymongo.MongoClient(mongo_URI)
+db = client["recommend_system"]
+# like a table in SQL
+collection = db["responses"]
+
+# 2. Auth with openai and generwate embeddings
+openai.api_key = st.secrets["​​OPENAI_API_KEY"]
 
 st.title('GHW Valentines Recommendation System')
 
