@@ -1,15 +1,6 @@
 import streamlit as st
 
-st.markdown(
-    """
-    <style>
-    input[type="text"] {
-        background-color: #ffcccb; /* Light pink background */
-        color: black; /* Optional: Text color */
-    }
-    </style>
-    """, unsafe_allow_html=True
-)
+mongo_URI = st.secrets["mongo_URI"]
 
 st.title('GHW Valentines Recommendation System')
 
