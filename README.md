@@ -21,7 +21,7 @@ A recommendation system for matching people based on their answers to a set of p
 - Python 3.x
 - MongoDB (Cloud or local instance)
 - Streamlit for the front-end interface
-- `torch`, `transformers`, and other necessary libraries for embedding generation
+- Sentence Transformer for embedding generation
 
 ## Installation
 
