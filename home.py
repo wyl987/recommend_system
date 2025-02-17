@@ -61,15 +61,43 @@ def find_match(current_user_id, current_embedding):
       continue
     stored_embedding = pickle.loads(doc['embedding'])
     similarity_score = cosine_similarity([current_embedding], [stored_embedding])[0][0]
-    similarities.append((doc['_id'], similarity_score))
+    similarities.append((doc['_id'], similarity_score, doc['responses']))
   
   similarities.sort(reverse=True, key=lambda x:x[0])
   
-  return similarities[0][0] if similarities else None
+  return similarities[0] if similarities else None
     
 if st.button("Submit"):
-  # recommendation function
-  st.success("Match found!")
+  if name and hobbies and new_hobbies and cuisine and music and partner_traits and personalities:
+    response = {
+      "name": name,
+      "hobbies": hobbies,
+      "new_hobbies": new_hobbies,
+      "cuisine": cuisine,
+      "music": music,
+      "partner_traits": partner_traits,
+      "personalities": personalities
+    }
+    # generate embeddings
+    response_text  = " ".join(response.values())
+    actual_embedding = get_embeddings(response_text)
+    
+    #save the response to db
+    current_user_id = save_response_to_db(response, actual_embedding)
+    
+    # find match
+    match = find_match(current_user_id, actual_embedding)
+    
+    if match:
+      top_match, top_score, top_response = match[0]
+      st.success("Match found! {match}")
+    else: 
+      st.warning("You are the first one to fill in the form. Please wait for others to fill in the form.")
+    
+  else:
+    st.warning("Please fill in all the questions above.")
+    
+  
 else:
   st.warning("Please fill in the questions above.")
 
