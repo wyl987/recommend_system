@@ -3,6 +3,7 @@ import pymongo
 import openai
 import pickle
 from bson.binary import Binary
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 mongo_URI = st.secrets["mongo_URI"]
@@ -49,7 +50,23 @@ def save_response_to_db(response, embedding):
   })
   return result.inserted_id
 
-
+# find and match using cosine similarity math formula
+def find_match(current_user_id, current_embedding):
+  # Get all the responses
+  all_responses = collection.find({})
+  similarities = []
+  
+  for doc in all_responses:
+    if doc ['_id']  == current_user_id:
+      continue
+    stored_embedding = pickle.loads(doc['embedding'])
+    similarity_score = cosine_similarity([current_embedding], [stored_embedding])[0][0]
+    similarities.append((doc['_id'], similarity_score))
+  
+  similarities.sort(reverse=True, key=lambda x:x[0])
+  
+  return similarities[0][0] if similarities else None
+    
 if st.button("Submit"):
   # recommendation function
   st.success("Match found!")
