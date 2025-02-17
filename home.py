@@ -1,21 +1,9 @@
 import streamlit as st
 import pymongo
-import openai
+from sentence_transformers import SentenceTransformer
 import pickle
 from bson.binary import Binary
 from sklearn.metrics.pairwise import cosine_similarity
-
-
-mongo_URI = st.secrets["mongo_URI"]
-
-# 1. Create mongodb connection
-db_client = pymongo.MongoClient(mongo_URI)
-db = db_client["recommend_system"]
-# like a table in SQL
-collection = db["responses"]
-
-# 2. Auth with openai and generwate embeddings
-openai.api_key = st.secrets["​​OPENAI_API_KEY"]
 
 st.title('GHW Valentines Recommendation System')
 
@@ -33,13 +21,21 @@ music = st.text_input('What type of music do you enjoy the most?')
 partner_traits = st.text_area('What are you looking for in a partner?')
 personalities = st.text_area('How would your friends describe your personality?')
 
-# 3. Generate embeddings from openai model
+# 1. Create mongodb connection
+mongo_URI = st.secrets["general_secrets"]["mongo_URI"]
+db_client = pymongo.MongoClient(mongo_URI)
+db = db_client["recommend_system"]
+# like a table in SQL
+collection = db["responses"]
+
+# 2. Load Hugging Face sentence transformer model
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# 3. Generate embeddings from sentence transformer model
 def get_embeddings(text):
-  response = openai.embeddings.create(
-      input=text,
-      model="text-embedding-ada-002"
-  ) 
-  return response.data[0].embedding
+  embedding = model.encode(text)
+  print(embedding)
+  return embedding
 
 # 4. Save the responses to mongodb
 def save_response_to_db(response, embedding):
@@ -63,7 +59,7 @@ def find_match(current_user_id, current_embedding):
     similarity_score = cosine_similarity([current_embedding], [stored_embedding])[0][0]
     similarities.append((doc['_id'], similarity_score, doc['responses']))
   
-  similarities.sort(reverse=True, key=lambda x:x[0])
+  similarities.sort(reverse=True, key=lambda x:x[1])
   
   return similarities[0] if similarities else None
     
@@ -89,8 +85,9 @@ if st.button("Submit"):
     match = find_match(current_user_id, actual_embedding)
     
     if match:
-      top_match, top_score, top_response = match[0]
-      st.success("Match found! {match}")
+      top_match, top_score, top_response = match
+      top_match_name = top_response["name"] 
+      st.success(f"Match found! Top match: {top_match_name}, Score: {top_score}")
     else: 
       st.warning("You are the first one to fill in the form. Please wait for others to fill in the form.")
     
